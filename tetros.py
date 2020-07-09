@@ -8,6 +8,8 @@ from pygame.locals import *
 pygame.init()
 pygame.font.init()
 
+# GLOBAL CONSTANTS
+
 WINDOW_WIDTH = 850
 PLAY_AREA_WIDTH = 480
 PLAY_AREA_HEIGHT = 880
@@ -36,6 +38,14 @@ COLORS = [
 
 
 class Tetromino:
+    """Class used to create Tetromino objects
+
+    Returns:
+        [Tetromino object]:
+        [has a shape, a bounding box,
+        and functions associated with
+        drawing and moving the object.]
+    """
 
     DROP_RATE = 5
 
@@ -73,9 +83,20 @@ class Tetromino:
                 self.color = COLORS[i]
 
     def deepcopy(self):
+        """Creates a deepcopy of the object it is called on.
+
+        Returns:
+            Tetromino object: Used to display the next piece in the window to
+            the side of the play area. A deepcopy is needed to ensure that the
+            position of the next piece isn't changed while drawing it in the
+            next piece window.
+        """
         return Tetromino(self.shape)
 
     def set_blocks(self):
+        """Uses the string version of the Tetromino's shape to generate an
+        array that can be used to draw and rotate the Tetromino.
+        """
         if self.shape == "I":
             self.blocks = [
                 [0, 0, 0, 0],
@@ -83,38 +104,38 @@ class Tetromino:
                 [0, 0, 0, 0],
                 [0, 0, 0, 0]
             ]
-        if self.shape == "O":
+        elif self.shape == "O":
             self.blocks = [
                 [0, 0, 0, 0],
                 [0, 1, 1, 0],
                 [0, 1, 1, 0],
                 [0, 0, 0, 0]
             ]
-        if self.shape == "T":
+        elif self.shape == "T":
             self.blocks = [
                 [0, 1, 0],
                 [1, 1, 1],
                 [0, 0, 0]
             ]
-        if self.shape == "S":
+        elif self.shape == "S":
             self.blocks = [
                 [0, 1, 1],
                 [1, 1, 0],
                 [0, 0, 0]
             ]
-        if self.shape == "Z":
+        elif self.shape == "Z":
             self.blocks = [
                 [1, 1, 0],
                 [0, 1, 1],
                 [0, 0, 0]
             ]
-        if self.shape == "J":
+        elif self.shape == "J":
             self.blocks = [
                 [1, 0, 0],
                 [1, 1, 1],
                 [0, 0, 0]
             ]
-        if self.shape == "L":
+        elif self.shape == "L":
             self.blocks = [
                 [0, 0, 0],
                 [1, 1, 1],
@@ -122,6 +143,8 @@ class Tetromino:
             ]
 
     def rotate(self):
+        """Rotates the Tetromino clockwise
+        """
         rotated = [[] for _ in range(len(self.blocks))]
         for x in range(len(self.blocks)):
             for y in range(len(self.blocks)):
@@ -129,6 +152,8 @@ class Tetromino:
         self.blocks = rotated
 
     def rotate_cc(self):
+        """Rotates the Tetromino counterclockwise
+        """
         rotated = [[] for _ in range(len(self.blocks))]
         for x in range(len(self.blocks)):
             for y in range(len(self.blocks)):
@@ -136,6 +161,12 @@ class Tetromino:
         self.blocks = rotated
 
     def draw(self, surface):
+        """Draws the Tetromino onto the surface given.
+
+        Args:
+            surface (pygame surface): designates which pygame surface to draw
+            the Tetromino onto.
+        """
         self.squares = []
         for x in range(len(self.blocks)):
             for y in range(len(self.blocks)):
@@ -150,6 +181,13 @@ class Tetromino:
             pygame.draw.rect(surface, self.color, square)
 
     def fall(self, level):
+        """Makes the Tetromino fall over time.
+
+        Args:
+            level (int): The current level that the player is on,
+            based on the number of rows they have cleared. At higher levels,
+            the Tetrominos will fall faster.
+        """
         if self.falling == True:
             self.tick_count += (level / 2)
             if self.tick_count > self.DROP_RATE:
@@ -157,9 +195,27 @@ class Tetromino:
                 self.tick_count = 0
 
     def drop(self, placed_blocks):
+        """Drops the Tetromino much more quickly than normal.
+
+        Args:
+            placed_blocks (list): A list containing the pygame rectangles
+            for every block already placed on the level from pieces that
+            have already fallen and become fixed in place, but haven't been
+            cleared by completing a row.
+        """
         self.DROP_RATE = 0.5
 
     def shift(self, direction, placed_blocks):
+        """Shifts the Tetromino one column to the left or right.
+
+        Args:
+            direction (string): A string telling the function which direction
+            the user input specifies the Tetromino should move.
+            placed_blocks (list): A list containing the pygame rectangles
+            for every block already placed on the level from pieces that
+            have already fallen and become fixed in place, but haven't been
+            cleared by completing a row.
+        """
         left_edge = PLAY_AREA_WIDTH
         right_edge = 0
         top = []
@@ -204,7 +260,28 @@ class Tetromino:
 
 
 def draw_window(window, play_area, score_area, next_piece, tetrominos, next_tetromino, placed_blocks, score, level):
-    # Draws the window.
+    """Draws the window in which the game displays.
+
+    Args:
+        window (pygame surface): The full window surface, which contains the
+            play area, the score area, and the next piece area.
+        play_area (pygame surface): The play area in which falling Tetrominos
+            and the already placed blocks are contained.
+        score_area (pygame surface): The surface used to display the current
+            score and level.
+        next_piece (pygame surface): The surface used to display the next
+            Tetromino that will fall.
+        tetrominos (list): A list of Tetrominos currently in the "bag."
+            This list will repopulate once it only contains two items.
+        next_tetromino (Tetromino): A Tetromino object of the next Tetromino
+            that will fall.
+        placed_blocks (list): A list containing the pygame rectangles
+            for every block already placed on the level from pieces that
+            have already fallen and become fixed in place, but haven't been
+            cleared by completing a row.
+        score (int): The player's current score.
+        level (int): The level that the player is currently on.
+    """
     window.fill(BACKGROUND_COLOR)
 
     next_border_rect = pygame.Rect(
@@ -241,6 +318,13 @@ def draw_window(window, play_area, score_area, next_piece, tetrominos, next_tetr
 
 
 def draw_grid(play_area):
+    """Draws a grid onto the play area so the player can see the rows and 
+    columns that constrain the Tetrominos.
+
+    Args:
+        play_area (pygame surface): The play area in which falling Tetrominos
+            and the already placed blocks are contained.
+    """
     for x in range(0, PLAY_AREA_WIDTH, GRID_SIZE):
         pygame.draw.line(play_area, GRID_COLOR,
                          (x, 0), (x, PLAY_AREA_HEIGHT), 1)
@@ -250,6 +334,11 @@ def draw_grid(play_area):
 
 
 def pause(window):
+    """Pauses the game until it is unpaused by pressing ESC for F1.
+
+    Args:
+        window (pygame surface): The window in which the game is being played.
+    """
     paused = True
     pause_surface = pygame.Surface(
         (PLAY_AREA_WIDTH, PLAY_AREA_HEIGHT), pygame.SRCALPHA)
@@ -273,6 +362,12 @@ def pause(window):
 
 
 def game_over(window):
+    """Ends the game and gives the user a game over screen if they lose,
+    with the option to play a new game.
+
+    Args:
+        window (pygame surface): The window in which the game is being played.
+    """
     paused = True
     game_over_screen = pygame.Surface(
         (WINDOW_WIDTH, WINDOW_HEIGHT), pygame.SRCALPHA)
@@ -305,6 +400,22 @@ def game_over(window):
 
 
 def check_lines(placed_blocks):
+    """Checks to see if the placed blocks create a full row.
+
+    Args:
+        placed_blocks (list): A list containing the pygame rectangles
+            for every block already placed on the level from pieces that
+            have already fallen and become fixed in place, but haven't been
+            cleared by completing a row.
+
+    Returns:
+        placed_blocks (list): A list containing the pygame rectangles
+            for every block already placed on the level from pieces that
+            have already fallen and become fixed in place, but haven't been
+            cleared by completing a row.
+        rows_cleared (int): The number of rows that were cleared during the
+            calling of this function.
+    """
     rows_cleared = 0
     blocks_to_clear = []
     blocks_to_move = []
@@ -329,6 +440,17 @@ def check_lines(placed_blocks):
 
 
 def get_score(rows_cleared, level):
+    """Returns a value to add to the score after a row has been cleared.
+
+    Args:
+        rows_cleared (int): The number of rows cleared the last time the
+            check_lines function was called.
+        level (int): The player's current level.
+
+    Returns:
+        int: A number of points to be added to the score based on the
+            number of rows cleared and the current level.
+    """
     if rows_cleared == 0:
         return 0
     elif rows_cleared == 1:
@@ -342,6 +464,8 @@ def get_score(rows_cleared, level):
 
 
 def main():
+    """The main game loop function.
+    """
     window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Tetros")
     play_area = pygame.Surface((PLAY_AREA_WIDTH, PLAY_AREA_HEIGHT))
